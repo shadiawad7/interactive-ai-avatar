@@ -56,8 +56,6 @@ export function useContinuousConversation(
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const energyRafRef = useRef<number | null>(null)
   const isStoppingRef = useRef(false)
-  const inFlightRef = useRef(false)
-  const pendingUserTextRef = useRef<string | null>(null)
 
   useEffect(() => {
     setIsSupported(
@@ -230,15 +228,6 @@ export function useContinuousConversation(
 
   const speakResponse = useCallback(
     async (text: string) => {
-      // Avoid overlapping audio if a previous response is still playing.
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause()
-          audioRef.current.currentTime = 0
-        } catch {
-          // noop
-        }
-      }
       setConversationState('speaking')
       stopRecognition()
       clearSilenceTimer()
@@ -335,11 +324,6 @@ export function useContinuousConversation(
 
   const sendToBackend = useCallback(
     async (userText: string) => {
-      if (inFlightRef.current) {
-        pendingUserTextRef.current = userText
-        return
-      }
-      inFlightRef.current = true
       try {
         setConversationState('thinking')
 
@@ -386,13 +370,6 @@ export function useContinuousConversation(
         console.error(err)
         setError('Error al generar respuesta')
         setConversationState('idle')
-      } finally {
-        inFlightRef.current = false
-        const pending = pendingUserTextRef.current
-        pendingUserTextRef.current = null
-        if (pending && !isPausedRef.current) {
-          sendToBackendRef.current(pending)
-        }
       }
     },
     [personalityId, setConversationState, speakResponse]

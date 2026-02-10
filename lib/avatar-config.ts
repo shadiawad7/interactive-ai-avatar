@@ -2,7 +2,7 @@ import type { AvatarConfig, AvatarMood } from '@/types/avatar'
 
 // Mood-specific system prompts for distinct personalities (Spanish)
 export const MOOD_SYSTEM_PROMPTS: Record<AvatarMood, string> = {
-  happy: `Eres Alegra, una asistente de IA alegre y entusiasta en una conversacion por voz.
+  happy: `Eres Animador de niños, una asistente de IA alegre y entusiasta en una conversacion por voz.
 
 PERSONALIDAD:
 - Siempre calida, optimista y motivadora
@@ -18,7 +18,7 @@ REGLAS DE CONVERSACION:
 - Nunca uses markdown, viñetas ni formato especial
 - Responde SIEMPRE en espanol`,
 
-  angry: `Eres Fuego, un asistente de IA intenso y apasionado en una conversacion por voz.
+  angry: `Eres Asesor de mercado, un asistente de IA intenso y apasionado en una conversacion por voz.
 
 PERSONALIDAD:
 - Directo, sin rodeos y asertivo
@@ -35,7 +35,7 @@ REGLAS DE CONVERSACION:
 - Nunca uses markdown, viñetas ni formato especial
 - Responde SIEMPRE en espanol`,
 
-  sad: `Eres Bruma, una asistente de IA empatica y comprensiva en una conversacion por voz.
+  sad: `Eres Profesora de idiomas, una asistente de IA empatica y comprensiva en una conversacion por voz.
 
 PERSONALIDAD:
 - Amable, compasiva y profundamente carinosa
@@ -57,23 +57,23 @@ REGLAS DE CONVERSACION:
 export const AVATARS: AvatarConfig[] = [
   {
     id: 'alegra',
-    name: 'Alegra',
+    name: 'Animador de niños',
     mood: 'happy',
-    description: 'Siempre alegre y entusiasta',
+    description: 'Animador infantil alegre y entusiasta',
     imageUrl: '/images/contento.jpg',
   },
   {
     id: 'fuego',
-    name: 'Fuego',
+    name: 'Asesor de mercado',
     mood: 'angry',
-    description: 'Intenso y apasionado',
+    description: 'Asesor directo y apasionado',
     imageUrl: '/images/enfadado.jpg',
   },
   {
     id: 'bruma',
-    name: 'Bruma',
+    name: 'Profesora de idiomas',
     mood: 'sad',
-    description: 'Empatica y comprensiva',
+    description: 'Docente empatica y comprensiva',
     imageUrl: '/images/triste.jpg',
   },
 ]

@@ -15,15 +15,21 @@ const rpmUrl = (id: string) =>
   `https://models.readyplayer.me/${id}.glb?morphTargets=ARKit,Oculus%20Visemes`
 
 const AVATAR_MODELS = {
-  alegre: rpmUrl('698238c1fcad0d2f33ea665c'),
-  empatico: rpmUrl('69823b9c7091d5aa567556b2'),
-  intenso: rpmUrl('698233b037816994171a6669'),
+  animador: rpmUrl('698238c1fcad0d2f33ea665c'),
+  profesora: rpmUrl('69823b9c7091d5aa567556b2'),
+  asesor: rpmUrl('698233b037816994171a6669'),
 }
 
 const PERSONALITY_BY_AVATAR: Record<keyof typeof AVATAR_MODELS, PersonalityId> = {
-  alegre: 'alegra',
-  empatico: 'empatico',
-  intenso: 'intenso',
+  animador: 'alegra',
+  profesora: 'empatico',
+  asesor: 'intenso',
+}
+
+const AVATAR_LABELS: Record<keyof typeof AVATAR_MODELS, string> = {
+  animador: 'Animador de niños',
+  profesora: 'Profesora de idiomas',
+  asesor: 'Asesor de mercado',
 }
 
 // Controles manuales de encuadre 3D (ajusta estos numeros a tu gusto).
@@ -57,7 +63,7 @@ export default function Home() {
     resetConversation,
   } = useContinuousConversation({
     personalityId,
-    silenceTimeout: 1200,
+    silenceTimeout: 300,
   })
 
   useEffect(() => {
@@ -101,8 +107,8 @@ export default function Home() {
               cameraZ={AVATAR_FRAME.cameraZ}
             />
 
-            <p className="text-sm capitalize text-white/70">
-              habitacion de {roomAvatarId}
+            <p className="text-sm text-white/70">
+              habitación de {AVATAR_LABELS[roomAvatarId]}
             </p>
 
             <div className="flex flex-col items-center gap-3">
@@ -160,7 +166,7 @@ export default function Home() {
                     cameraTargetY={AVATAR_FRAME.cameraTargetY}
                     cameraZ={AVATAR_FRAME.cameraZ}
                   />
-                  <p className="text-sm capitalize text-white/70">{id}</p>
+                  <p className="text-sm text-white/70">{AVATAR_LABELS[id]}</p>
                 </button>
               )
             )}

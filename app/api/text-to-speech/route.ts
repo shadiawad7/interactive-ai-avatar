@@ -18,6 +18,12 @@ const STYLE_BY_PERSONALITY: Record<'alegra' | 'empatico' | 'intenso', string> = 
     'Voz masculina adulta, firme y segura. Espanol natural, directo, conversacional, con cadencia humana, sin sonar mecanico.',
 }
 
+const SPEED_BY_PERSONALITY: Record<'alegra' | 'empatico' | 'intenso', number> = {
+  alegra: 0.98,
+  empatico: 0.95,
+  intenso: 0.97,
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as TtsRequest
@@ -39,6 +45,12 @@ export async function POST(req: Request) {
     }
 
     const model = process.env.OPENAI_TTS_MODEL || 'gpt-4o-mini-tts'
+    const envSpeed = Number(process.env.OPENAI_TTS_SPEED)
+    const baseSpeed =
+      Number.isFinite(envSpeed) && envSpeed >= 0.25 && envSpeed <= 4.0
+        ? envSpeed
+        : SPEED_BY_PERSONALITY[personalityId]
+    const speed = Math.min(4.0, baseSpeed * 1.1)
 
     const openaiRes = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -51,6 +63,7 @@ export async function POST(req: Request) {
         voice: VOICE_BY_PERSONALITY[personalityId],
         input: text,
         instructions: STYLE_BY_PERSONALITY[personalityId],
+        speed,
         response_format: 'mp3',
       }),
     })

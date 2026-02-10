@@ -30,7 +30,7 @@ export function ConversationView() {
   } = useContinuousConversation({
     avatar: selectedAvatar,
     personalityId: selectedAvatar.id,
-    silenceTimeout: 1800,
+    silenceTimeout: 300,
   })
 
   const handleAvatarSelect = useCallback(

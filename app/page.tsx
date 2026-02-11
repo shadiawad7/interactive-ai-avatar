@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AvatarScene } from '@/components/avatar3d/AvatarScene'
+import dynamic from 'next/dynamic'
 import { useContinuousConversation } from '@/hooks/use-continuous-conversation'
 import { StatusIndicator } from '@/components/ui/status-indicator'
 import type { PersonalityId } from '@/lib/personalities'
@@ -31,6 +31,18 @@ const AVATAR_LABELS: Record<keyof typeof AVATAR_MODELS, string> = {
   profesora: 'Profesora de idiomas',
   asesor: 'Asesor de mercado',
 }
+
+const AvatarScene = dynamic(
+  () => import('@/components/avatar3d/AvatarScene').then((mod) => mod.AvatarScene),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[360px] w-[260px] items-center justify-center rounded-xl bg-white/10 text-sm text-white/70">
+        Cargando...
+      </div>
+    ),
+  }
+)
 
 // Controles manuales de encuadre 3D (ajusta estos numeros a tu gusto).
 const AVATAR_FRAME = {
@@ -63,7 +75,7 @@ export default function Home() {
     resetConversation,
   } = useContinuousConversation({
     personalityId,
-    silenceTimeout: 300,
+    silenceTimeout: 200,
   })
 
   useEffect(() => {
@@ -73,12 +85,12 @@ export default function Home() {
   }, [personalityId, pause, resetConversation])
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden">
       {/* Fondo */}
       <div className="fixed inset-0 bg-gradient-to-b from-background via-background to-background/95" />
 
       {/* UI */}
-      <div className="relative z-10 flex flex-col items-center gap-8 pt-20 md:pt-28">
+      <div className="relative z-10 flex flex-col items-center gap-8 pb-16 pt-16 md:pt-24">
         {roomAvatarId ? (
           <div className="flex flex-col items-center gap-4">
             <button

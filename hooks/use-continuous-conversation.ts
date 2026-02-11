@@ -32,7 +32,7 @@ type UseContinuousConversationReturn = {
 export function useContinuousConversation(
   options: UseContinuousConversationOptions
 ): UseContinuousConversationReturn {
-  const { personalityId, silenceTimeout = 300 } = options
+  const { personalityId, silenceTimeout = 200 } = options
 
   const [state, setState] = useState<ConversationState>('idle')
   const [error, setError] = useState<string | null>(null)

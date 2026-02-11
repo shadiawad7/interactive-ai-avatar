@@ -336,7 +336,8 @@ export function useContinuousConversation(
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            messages: messagesRef.current,
+            // Keep only recent turns to reduce latency and token load.
+            messages: messagesRef.current.slice(-8),
             personalityId,
           }),
         })

@@ -70,7 +70,7 @@ Reglas globales:
         body: JSON.stringify({
           model: chatModel,
           messages: openaiMessages,
-          max_completion_tokens: 180,
+          max_completion_tokens: 120,
         }),
       })
       return res

@@ -9,6 +9,23 @@ type Message = {
   content: string
 }
 
+const LANGUAGE_HINTS: Array<{ pattern: RegExp; lang: string }> = [
+  { pattern: /\b(ingles|inglés|english)\b/i, lang: 'en-US' },
+  { pattern: /\b(frances|francés|french)\b/i, lang: 'fr-FR' },
+  { pattern: /\b(aleman|alemán|german)\b/i, lang: 'de-DE' },
+  { pattern: /\b(italiano|italian)\b/i, lang: 'it-IT' },
+  { pattern: /\b(portugues|portugués|portuguese)\b/i, lang: 'pt-PT' },
+  { pattern: /\b(catalan|catalán|catalan)\b/i, lang: 'ca-ES' },
+  { pattern: /\b(espanol|español|spanish|castellano)\b/i, lang: 'es-ES' },
+]
+
+function getRequestedRecognitionLang(text: string): string | null {
+  for (const hint of LANGUAGE_HINTS) {
+    if (hint.pattern.test(text)) return hint.lang
+  }
+  return null
+}
+
 type UseContinuousConversationOptions = {
   avatar?: AvatarConfig
   personalityId: string
@@ -56,6 +73,8 @@ export function useContinuousConversation(
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null)
   const energyRafRef = useRef<number | null>(null)
   const isStoppingRef = useRef(false)
+  const isProcessingRef = useRef(false)
+  const recognitionLangRef = useRef('es-ES')
 
   useEffect(() => {
     setIsSupported(
@@ -167,7 +186,8 @@ export function useContinuousConversation(
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
 
     const recognition = new SpeechRecognitionClass()
-    recognition.lang = 'es-ES'
+    recognition.lang =
+      personalityId === 'empatico' ? recognitionLangRef.current : 'es-ES'
     recognition.continuous = true
     recognition.interimResults = true
     recognition.maxAlternatives = 1
@@ -202,6 +222,7 @@ export function useContinuousConversation(
       const buffered = finalBufferRef.current.trim()
       if (buffered.length >= 3 && !isPausedRef.current) {
         silenceTimerRef.current = setTimeout(async () => {
+          if (isProcessingRef.current) return
           const userText = finalBufferRef.current.trim()
           finalBufferRef.current = ''
           setInterimTranscript('')
@@ -224,7 +245,7 @@ export function useContinuousConversation(
 
     recognition.start()
     recognitionRef.current = recognition
-  }, [clearSilenceTimer, isSupported, setConversationState, silenceTimeout])
+  }, [clearSilenceTimer, isSupported, personalityId, setConversationState, silenceTimeout])
 
   const speakResponse = useCallback(
     async (text: string) => {
@@ -324,7 +345,17 @@ export function useContinuousConversation(
 
   const sendToBackend = useCallback(
     async (userText: string) => {
+      if (isProcessingRef.current || isPausedRef.current) return
+      isProcessingRef.current = true
       try {
+        if (personalityId === 'empatico') {
+          const requestedLang = getRequestedRecognitionLang(userText)
+          if (requestedLang) {
+            recognitionLangRef.current = requestedLang
+          }
+        }
+        clearSilenceTimer()
+        stopRecognition()
         setConversationState('thinking')
 
         messagesRef.current.push({
@@ -360,6 +391,7 @@ export function useContinuousConversation(
         const data = await res.json()
         const reply = (data.message as string)?.trim()
         if (!reply) throw new Error('Empty model response')
+        if (isPausedRef.current) return
 
         messagesRef.current.push({
           role: 'assistant',
@@ -371,9 +403,11 @@ export function useContinuousConversation(
         console.error(err)
         setError('Error al generar respuesta')
         setConversationState('idle')
+      } finally {
+        isProcessingRef.current = false
       }
     },
-    [personalityId, setConversationState, speakResponse]
+    [clearSilenceTimer, personalityId, setConversationState, speakResponse, stopRecognition]
   )
 
   useEffect(() => {
@@ -383,6 +417,7 @@ export function useContinuousConversation(
   const resetConversation = useCallback(() => {
     messagesRef.current = []
     finalBufferRef.current = ''
+    recognitionLangRef.current = 'es-ES'
     setInterimTranscript('')
     setError(null)
   }, [])
